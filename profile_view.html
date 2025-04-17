@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}{{ user.username }}'s Profile{% endblock %}
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-100 to-white flex items-center justify-center py-10 px-4">
+  <div class="relative bg-white rounded-xl shadow-2xl max-w-3xl w-full p-8">
+    <!-- Header with Edit Option -->
+    <div class="flex justify-between items-center border-b pb-3 mb-6">
+      <h1 class="text-3xl font-bold text-teal-700">Your Profile</h1>
+      <a href="{% url 'profile_edit' %}" class="bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded transition duration-300">
+        Edit Profile
+      </a>
+    </div>
+
+    <!-- Profile Details -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Personal Details -->
+      <div>
+        <p class="text-lg mb-3">
+          <span class="font-semibold text-gray-800">Name:</span> {{ user.first_name }} {{ user.last_name }}
+        </p>
+        <p class="text-lg mb-3">
+          <span class="font-semibold text-gray-800">Email:</span> {{ user.email }}
+        </p>
+      </div>
+      <!-- Farm Details -->
+      <div>
+        <p class="text-lg mb-3">
+          <span class="font-semibold text-gray-800">Farm Name:</span> {{ profile.farm_name }}
+        </p>
+        <p class="text-lg mb-3">
+          <span class="font-semibold text-gray-800">Location:</span> {{ profile.location }}
+        </p>
+        <p class="text-lg mb-3">
+          <span class="font-semibold text-gray-800">Phone:</span> {{ profile.phone_number }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Back to Home Link at the Bottom (Optional) -->
+    <div class="mt-8 text-right">
+      <a href="{% url 'home' %}" class="inline-block text-teal-600 hover:text-teal-500 text-lg font-semibold transition duration-300">
+        &larr; Home
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

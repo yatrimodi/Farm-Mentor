@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Expense-Tracker" %}{% endblock %}
+{% block content %}
+<!-- Full-page layout -->
+<div class="bg-gray-50 flex flex-col min-h-screen">
+
+<!-- Navbar -->
+<nav class="bg-transparent py-3 sticky top-0 z-50">
+    <div class="container mx-auto flex justify-between items-center px-4">
+        <!-- Farm Expense Tracker Title -->
+        <a href="#" class="text-teal-700 text-2xl font-semibold hover:text-teal-300 transition duration-300">
+            {% trans "Farm Expense Tracker" %}
+        </a>
+        <div>
+        <!-- Home Button -->
+            <a href="{% url 'home' %}" class="text-teal-700 border border-teal-700 px-6 py-2 rounded-md hover:bg-red-500 hover:text-white transition duration-300">
+            {% trans "Home" %}
+            </a>
+            <!-- View Expenses Button -->
+            <a href="{% url 'view_expenses' %}" class="text-teal-700 border border-teal-700 px-6 py-2 rounded-md hover:bg-red-500 hover:text-white transition duration-300 ml-4">
+            {% trans "View Expenses History" %}
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- Card Grid Layout -->
+<div class="container mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 flex-grow">
+
+     <!-- Add New Expense Form Card -->
+    <div class="p-6 space-y-6">
+        <h3 class="text-2xl font-semibold text-teal-700">{% trans "Add New Expense" %}</h3>
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label for="category" class="block text-teal-700">{% trans "Category" %}</label>
+                <select name="category" id="category" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+                    <option value="Fertilizers">{% trans "Fertilizers" %}</option>
+                    <option value="Pesticides">{% trans "Pesticides" %}</option>
+                    <option value="Equipment">{% trans "Equipment" %}</option>
+                    <option value="Labor">{% trans "Labor" %}</option>
+                    <option value="Other">{% trans "Other" %}</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="amount" class="block text-teal-700">{% trans "Amount" %}</label>
+                <input type="number" name="amount" id="amount" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500" step="0.01" required>
+            </div>
+            <div class="mb-4">
+                <label for="description" class="block text-teal-700">{% trans "Description" %}</label>
+                <textarea name="description" id="description" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="w-full bg-teal-600 text-white py-2 rounded-md hover:bg-teal-700 transition duration-300">{% trans "Add Expense" %}</button>
+        </form>
+    </div>
+
+    <!-- Recent Expenses Table Section -->
+    <div class="p-6 space-y-6">
+        <h3 class="text-2xl font-semibold text-teal-700">{% trans "Recent Expenses" %}</h3>
+        <table class="w-full text-sm text-gray-700">
+            <thead class="bg-teal-50">
+                <tr>
+                    <th class="px-4 py-3 text-left">{% trans "Date" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Category" %}</th>
+                    <th class="px-4 py-3 text-left">{% trans "Amount" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for expense in recent_expenses %}
+                <tr class="hover:bg-teal-100 transition-all duration-200 ease-in-out">
+                    <td class="px-4 py-3">{{ expense.date|date:"Y-m-d" }}</td>
+                    <td class="px-4 py-3">{{ expense.category }}</td>
+                    <td class="px-4 py-3">{{ expense.amount|default:"0.00" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="px-4 py-3 text-center text-gray-500">{% trans "No expenses recorded yet." %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{% url 'view_expenses' %}" class="text-teal-600 hover:text-teal-800 mt-4 block text-center font-semibold">{% trans "View Full History" %}</a>
+    </div>
+
+    <!-- Expense Report Chart Card -->
+    <div class="p-6 space-y-6">
+        <h3 class="text-2xl font-semibold text-teal-700">{% trans "Expense Report" %}</h3>
+        {% if categories and totals %}
+        <canvas id="expenseChart" class="w-full h-64"></canvas>
+        {% else %}
+        <p class="text-center text-gray-500">{% trans "No data available for the chart." %}</p>
+        {% endif %}
+    </div>
+
+</div>
+<footer class="text-center py-4 bg-gray-100 mt-6 shadow-inner">
+    <p class="text-gray-600 text-sm">{% trans "Thank you for using the Expense Tracker! ❤" %}</p>
+</footer>
+</div>
+
+<!-- Chart.js Integration -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
+<script>
+    {% if categories and totals %}
+    const ctx = document.getElementById('expenseChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: {{ categories|safe }},
+            datasets: [{
+                data: {{ totals|safe }},
+                backgroundColor: ['#E8129D', '#A3D900', '#00BFFF', '#FFD700', '#DC143C'],
+                borderColor: '#ffffff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+            }
+        }
+    });
+    {% endif %}
+</script>
+{% endblock %}

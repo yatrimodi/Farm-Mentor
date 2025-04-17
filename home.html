@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+{% block title %}{% trans "AgroAI- Smarter Agriculture" %}{% endblock %}
+{% block content %}
+<nav role="navigation" aria-label="Main Navigation" class="bg-white shadow-md">
+  <!-- Main Container -->
+  <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+    <!-- Left: Logo -->
+    <div>
+      <a href="{% url 'home' %}" class="text-teal-700 text-3xl font-bold">AgroAI</a>
+    </div>
+
+    <!-- Middle: Primary Links (Desktop) -->
+    <div class="hidden md:flex items-center space-x-8">
+      <!-- Chatbot Link with Icon -->
+      <a href="{% url 'chatbot' %}" class="flex items-center text-teal-700 hover:text-teal-800 transition">
+        <i class="fas fa-comments mr-2"></i>
+        <span>{% trans "Chatbot" %}</span>
+      </a>
+
+      <!-- Language Dropdown with Globe Icon -->
+      <div class="relative">
+        <button id="language-toggle" aria-haspopup="true" aria-expanded="false"
+                class="flex items-center px-3 py-2 border rounded-md bg-white hover:bg-gray-100 transition">
+          <i class="fas fa-globe mr-2"></i>
+          <span class="text-sm text-teal-700">{% trans "Language" %}</span>
+        </button>
+        <div id="language-menu"
+             class="absolute right-0 hidden bg-white shadow-lg rounded-md mt-2 w-40 ring-1 ring-gray-300 z-10">
+          <form method="post" action="{% url 'set_language' %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button type="submit" name="language" value="en"
+                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              English
+            </button>
+            <button type="submit" name="language" value="hi"
+                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              हिंदी
+            </button>
+            <button type="submit" name="language" value="gu"
+                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              ગુજરાતી
+            </button>
+            <button type="submit" name="language" value="mr"
+                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              मराठी
+            </button>
+            <button type="submit" name="language" value="tg"
+                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              తెలుగు
+            </button>
+            <button type="submit" name="language" value="kd"
+                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              ಕನ್ನಡ
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: User Dropdown (Desktop) -->
+    <div class="hidden md:flex items-center">
+      {% if user.is_authenticated %}
+        <div class="relative">
+          <button id="profile-toggle" aria-haspopup="true" aria-expanded="false"
+                  class="flex items-center focus:outline-none">
+            <div class="w-10 h-10 rounded-full bg-teal-600 text-white flex items-center justify-center">
+              {{ user.username|slice:":1"|upper }}
+            </div>
+          </button>
+          <div id="profile-menu" class="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md hidden ring-1 ring-gray-300 z-10">
+            <a href="{% url 'profile_view' %}"
+               class="block px-4 py-2 text-teal-700 hover:bg-gray-100">
+              {% trans "Profile" %}
+            </a>
+            <a href="{% url 'logout' %}"
+               class="block px-4 py-2 text-teal-700 hover:bg-gray-100">
+              {% trans "Logout" %}
+            </a>
+          </div>
+        </div>
+      {% else %}
+        <a href="{% url 'login' %}" class="text-teal-700 hover:text-teal-500 transition">
+          {% trans "Login" %}
+        </a>
+      {% endif %}
+    </div>
+
+    <!-- Mobile Menu Toggle -->
+    <div class="md:hidden">
+      <button id="mobile-menu-toggle" aria-controls="mobile-menu" aria-expanded="false"
+              class="text-teal-700 text-2xl">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="hidden md:hidden px-4 pb-4 space-y-2">
+    <a href="{% url 'chatbot' %}" class="flex items-center text-teal-700 hover:text-teal-500 transition">
+      <i class="fas fa-comments mr-2"></i>
+      {% trans "Chatbot" %}
+    </a>
+
+    <!-- Mobile Language Dropdown -->
+    <div class="relative">
+      <button id="mobile-language-toggle"
+              class="flex items-center w-full text-left px-4 py-2 text-teal-700 hover:text-teal-500 transition">
+        <i class="fas fa-globe mr-2"></i>
+        <span>{% trans "Language" %}</span>
+      </button>
+      <div id="mobile-language-menu"
+           class="hidden bg-white shadow-lg rounded-md mt-2 w-40 ring-1 ring-gray-300">
+        <form method="post" action="{% url 'set_language' %}">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button type="submit" name="language" value="en"
+                  class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+            English
+          </button>
+          <button type="submit" name="language" value="hi"
+                  class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+            हिंदी
+          </button>
+          <button type="submit" name="language" value="gu"
+                  class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+            ગુજરાતી
+          </button>
+          <button type="submit" name="language" value="mr"
+                  class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+            मराठी
+          </button>
+          <button type="submit" name="language" value="tg"
+                  class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+            తెలుగు
+          </button>
+          <button type="submit" name="language" value="kd"
+                  class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+            ಕನ್ನಡ
+          </button>
+        </form>
+      </div>
+    </div>
+
+    {% if user.is_authenticated %}
+      <!-- Mobile User Section: Profile Dropdown -->
+      <div class="relative">
+        <button id="mobile-profile-toggle" aria-haspopup="true" aria-expanded="false"
+                class="flex items-center focus:outline-none w-full">
+          <div class="w-10 h-10 rounded-full bg-teal-600 text-white flex items-center justify-center mr-2">
+            {{ user.username|slice:":1"|upper }}
+          </div>
+          <span class="text-teal-700">{% trans "Account" %}</span>
+        </button>
+        <div id="mobile-profile-menu" class="absolute right-4 mt-2 w-40 bg-white shadow-lg rounded-md hidden ring-1 ring-gray-300 z-10">
+          <a href="{% url 'profile_view' %}" class="block px-4 py-2 text-teal-700 hover:bg-gray-100">
+            {% trans "Profile" %}
+          </a>
+          <a href="{% url 'logout' %}" class="block px-4 py-2 text-teal-700 hover:bg-gray-100">
+            {% trans "Logout" %}
+          </a>
+        </div>
+      </div>
+    {% else %}
+      <a href="{% url 'login' %}" class="block text-teal-700 hover:text-teal-500 transition">
+        {% trans "Login" %}
+      </a>
+    {% endif %}
+  </div>
+</nav>
+
+      <!-- hero section-->
+<section class="hero-section bg-white text-center pt-24 pb-5 px-6 md:px-20 shadow-sm">
+    <div class="max-w-6xl mx-auto">
+        <!-- Hero Title -->
+        <h1 class="text-4xl md:text-5xl font-bold text-teal-700 mb-6 tracking-wide">
+            {% trans "Welcome to AgroAI" %}
+        </h1>
+        <p class="text-lg md:text-xl text-gray-600 mb-12">
+            {% trans "Your trusted guide for smarter agriculture solutions." %}
+        </p>
+
+        <!-- Hero Buttons -->
+        <div class="flex flex-wrap justify-center gap-4">
+            <!-- Get Crop Suggestions Button -->
+            <a href="{% url 'suggest_crops' %}" class="px-6 py-3 text-lg font-medium text-white bg-teal-700 rounded-lg shadow-lg hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-teal-300 transition duration-300">
+                <i class="fas fa-seedling mr-2"></i>  <!-- Icon for Get Crop Suggestions -->
+                {% trans "Get Crop Suggestions" %}
+            </a>
+
+            <a href="{% url 'upload_soil_map' %}" class="px-6 py-3 text-lg font-medium text-teal-700 border border-teal-700 rounded-lg shadow-md hover:bg-red-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-300 transition duration-300">
+                <i class="fas fa-cloud-upload-alt mr-2"></i>  <!-- Icon for Upload Soil Map -->
+                {% trans "Upload Soil Map" %}
+            </a>
+
+            <!-- Track Expenses Button -->
+            <a href="{% url 'expense' %}" class="px-6 py-3 text-lg font-medium text-teal-700 border border-teal-700 rounded-lg shadow-md hover:bg-red-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-300 transition duration-300">
+                <i class="fas fa-wallet mr-2"></i>  <!-- Icon for Track Expenses -->
+                {% trans "Track Expenses" %}
+            </a>
+
+            <!-- View Analytics Button -->
+            <a href="/analytics/" class="px-6 py-3 text-lg font-medium text-teal-700 border border-teal-700 rounded-lg shadow-md hover:bg-red-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-300 transition duration-300">
+                <i class="fas fa-chart-line mr-2"></i>  <!-- Icon for View Analytics -->
+                {% trans "View Analytics" %}
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-20 px-6 bg-white text-center">
+    <h2 class="text-4xl font-bold text-teal-700 mb-12 tracking-wide">{% trans "Why Choose AgroAI?" %}</h2>
+    <div class="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Personalized Crop Advice -->
+        <div class="feature-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition transform hover:scale-105 border border-teal-700 hover:border-teal-500">
+            <div class="text-teal-500 text-4xl mb-4 transition-transform transform hover:scale-110">
+                <i class="fas fa-seedling"></i> <!-- Icon for Personalized Crop Advice -->
+            </div>
+            <h4 class="text-xl font-semibold mb-4">{% trans "Personalized Crop Advice" %}</h4>
+            <p class="text-gray-700">{% trans "Get tailored crop suggestions based on real-time data and soil conditions, improving productivity." %}</p>
+        </div>
+
+        <!-- Live Weather Updates -->
+        <a href="{% url 'weather' %}" class="feature-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition transform hover:scale-105 border border-teal-700 hover:border-teal-500">
+            <div class="text-teal-500 text-4xl mb-4 transition-transform transform hover:scale-110">
+                <i class="fas fa-cloud-sun"></i> <!-- Icon for Live Weather Updates -->
+            </div>
+            <h4 class="text-xl font-semibold mb-4">{% trans "Live Weather Updates" %}</h4>
+            <p class="text-gray-700">{% trans "Plan your farming activities effectively with live weather insights for better crop management." %}</p>
+        </a>
+    
+        <!-- Smart Analytics or Lock if not logged in -->
+        {% if user.is_authenticated %}
+        <div class="feature-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition transform hover:scale-105 border border-teal-700 hover:border-teal-500">
+            <div class="text-teal-500 text-4xl mb-4 transition-transform transform hover:scale-110">
+                <i class="fas fa-chart-line "></i> <!-- Icon for Smart Analytics -->
+            </div>
+            <h4 class="text-xl font-semibold mb-4 ">{% trans "Smart Analytics" %}</h4>
+            <p class="text-gray-700">{% trans "Analyze trends and make informed decisions to maximize your yield with advanced data analytics." %}</p>
+        </div>
+        {% else %}
+        <a href="{% url 'login' %}" class="feature-card bg-teal-700 text-white p-6 rounded-lg shadow-md hover:shadow-lg transition transform hover:scale-105">
+            <div class="text-white text-4xl mb-4 transition-transform transform hover:scale-110">
+                <i class="fas fa-lock"></i> <!-- Icon for Unlock More Features -->
+            </div>
+            <h4 class="text-xl font-semibold mb-4">{% trans "Unlock More Features" %}</h4>
+            <p class="text-gray-200">{% trans "Sign in to access smart analytics, expense tracking, and more." %}</p>
+        </a>
+        {% endif %}
+    </div>
+
+</section>
+
+<footer class="bg-teal-700 text-white py-12 mt-20">
+    <div class="max-w-7xl mx-auto px-6">
+        <!-- Footer Top -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <!-- Logo & Description -->
+            <div>
+                <a href="#" class="text-3xl font-bold text-white">{% trans "AgroAI" %}</a>
+                <p class="text-gray-300 mt-4">{% trans "Your trusted partner for smarter agriculture solutions." %}</p>
+            </div>
+
+            <!-- Quick Links -->
+            <div>
+                <h3 class="text-xl font-semibold mb-4">{% trans "Quick Links" %}</h3>
+                <ul>
+                    <li><a href="{% url 'home' %}" class="text-gray-300 hover:text-white transition">{% trans "Home" %}</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-white transition">{% trans "About" %}</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-white transition">{% trans "Contact" %}</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-white transition">{% trans "Blog" %}</a></li>
+                </ul>
+            </div>
+
+            <!-- Social Media & Newsletter -->
+            <div>
+                <h3 class="text-xl font-semibold mb-4">{% trans "Follow Us" %}</h3>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-300 hover:text-white transition"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="text-gray-300 hover:text-white transition"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-gray-300 hover:text-white transition"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-gray-300 hover:text-white transition"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Bottom -->
+        <div class="text-center">
+            <p class="text-sm text-gray-300">{% trans "© 2024 AgroAI. All rights reserved." %}</p>
+        </div>
+    </div>
+</footer>
+    
+<script>
+  // Desktop Language Dropdown
+  const languageToggle = document.getElementById('language-toggle');
+  const languageMenu = document.getElementById('language-menu');
+  languageToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    languageMenu.classList.toggle('hidden');
+  });
+
+  // Desktop Profile Dropdown
+  const profileToggle = document.getElementById('profile-toggle');
+  const profileMenu = document.getElementById('profile-menu');
+  if(profileToggle) {
+    profileToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      profileMenu.classList.toggle('hidden');
+    });
+  }
+
+  // Mobile Language Dropdown
+  const mobileLanguageToggle = document.getElementById('mobile-language-toggle');
+  const mobileLanguageMenu = document.getElementById('mobile-language-menu');
+  mobileLanguageToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    mobileLanguageMenu.classList.toggle('hidden');
+  });
+
+  // Mobile Profile Dropdown
+  const mobileProfileToggle = document.getElementById('mobile-profile-toggle');
+  const mobileProfileMenu = document.getElementById('mobile-profile-menu');
+  if(mobileProfileToggle) {
+    mobileProfileToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      mobileProfileMenu.classList.toggle('hidden');
+    });
+  }
+
+  // Mobile Menu Toggle
+  const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+  const mobileMenu = document.getElementById('mobile-menu');
+  mobileMenuToggle.addEventListener('click', () => {
+    mobileMenu.classList.toggle('hidden');
+  });
+
+  // Close dropdowns on clicking outside
+  document.addEventListener('click', () => {
+    if(languageMenu) languageMenu.classList.add('hidden');
+    if(profileMenu) profileMenu.classList.add('hidden');
+    if(mobileLanguageMenu) mobileLanguageMenu.classList.add('hidden');
+    if(mobileProfileMenu) mobileProfileMenu.classList.add('hidden');
+  });
+</script>
+
+{% endblock %}

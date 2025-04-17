@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Soil Analysis Result</title>
+</head>
+<body>
+    <h1>🌱 Soil Analysis Result</h1>
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% else %}
+        <p><strong>Name:</strong> {{ name }}</p>
+        <p><strong>Soil Type:</strong> {{ soil_type }}</p>
+        <p><strong>Suggested Crops:</strong> {{ suggested_crops }}</p>
+        <p><strong>Fake Image Detection:</strong> {{ is_fake }}</p>
+
+        {% if image_path %}
+            <img src="{{ image_path }}" alt="Uploaded Soil Image" width="300px">
+        {% endif %}
+    {% endif %}
+    <br><br>
+    <a href="{% url 'upload_soil_map' %}">🔄 Upload Another Image</a>
+</body>
+</html>

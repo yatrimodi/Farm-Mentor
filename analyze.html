@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake Image Detector</title>
+</head>
+<body>
+    <h2>Upload an Image for Analysis</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="image" required>
+        <button type="submit">Analyze</button>
+    </form>
+
+    {% if image_path %}
+        <h3>Analysis Result:</h3>
+        <p>{{ result }}</p>
+        <img src="{{ image_path }}" alt="Uploaded Image" width="300">
+    {% endif %}
+</body>
+</html>

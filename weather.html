@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% trans "Live Weather" %}
+{% block content %}
+<div class="min-h-screen bg-gradient-to-r from-teal-400 to-teal-700 flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-lg p-6 md:p-10">
+        <!-- Title Section -->
+        <h1 class="text-3xl font-bold text-center text-teal-700 mb-4 animate__animated animate__fadeIn">{% trans "Weather in  " %}{{ city_name }}</h1>
+        {% if temperature %}
+        <!-- Weather Data Section -->
+        <div class="text-center animate__animated animate__fadeIn animate__delay-1s">
+            <img src="http://openweathermap.org/img/wn/{{ icon }}@2x.png" alt="{% trans 'Weather icon' %}" class="mx-auto mb-4">
+            <p class="text-5xl font-semibold text-teal-700">{{ temperature }}°C</p>
+            <p class="text-xl text-teal-500 capitalize mb-6">{{ description }}</p>
+
+            <!-- Additional Weather Info Section -->
+            <div class="flex justify-around mb-6">
+                <div class="text-teal-600">
+                    <p class="font-semibold">{% trans "Humidity" %}</p>
+                    <p>{{ humidity }}%</p>
+                </div>
+                <div class="text-teal-600">
+                    <p class="font-semibold">{% trans "Wind Speed" %}</p>
+                    <p>{{ wind_speed }} km/h</p>
+                </div>
+            </div>
+            <div class="flex justify-around mb-6">
+                <div class="text-teal-600">
+                    <p class="font-semibold">{% trans "Pressure" %}</p>
+                    <p>{{ pressure }} hPa</p>
+                </div>
+                <div class="text-teal-600">
+                    <p class="font-semibold">{% trans "Feels Like" %}</p>
+                    <p>{{ feels_like }}°C</p>
+                </div>
+            </div>
+
+            <!-- Refresh Button Section -->
+            <a href="{% url 'weather' %}" class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-md transition duration-300 transform hover:scale-105">
+                <i class="fas fa-sync-alt"></i> {% trans "Refresh" %}
+            </a>
+        </div>
+        {% else %}
+        <!-- Error Message Section -->
+        <div class="text-center text-red-500 animate__animated animate__fadeIn animate__delay-1s">
+            <p>{% trans "Sorry, we couldn't fetch the weather data. Please try again later." %}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

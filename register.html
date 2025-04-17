@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Register - AgroAI" %}{% endblock %}
+
+{% block content %}
+    <div class="min-h-screen flex items-center justify-center bg-gradient-to-r from-teal-600 via-teal-500 to-teal-600 dark:from-gray-900 dark:to-gray-800">
+<div class="relative z-10 max-w-md w-full bg-white dark:bg-gray-900 bg-opacity-80 dark:bg-opacity-90 backdrop-blur-lg p-10 rounded-3xl shadow-xl transition-all">
+        <h2 class="text-4xl font-bold text-center text-teal-800 mb-8">{% trans "AgroAI Registration" %}</h2>
+        <form method="POST" action="{% url 'register' %}">
+            {% csrf_token %}
+            
+            <div class="mb-6">
+                <label for="username" class="block text-lg font-medium text-teal-700">{% trans "Username" %}</label>
+                <input id="username" type="text" name="username" class="mt-2 block w-full px-6 py-3 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent placeholder:text-gray-400 transition-all" placeholder="{% trans 'Enter your username' %}" required>
+                {% if form.username.errors %}
+                    <ul class="text-red-500 mt-2">
+                        {% for error in form.username.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            
+            <div class="mb-6">
+                <label for="email" class="block text-lg font-medium text-teal-700">{% trans "Email" %}</label>
+                <input id="email" type="email" name="email"  class="mt-2 block w-full px-6 py-3 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent placeholder:text-gray-400 transition-all" placeholder="{% trans 'Enter your email' %}" required>
+                {% if form.email.errors %}
+                    <ul class="text-red-500 mt-2">
+                        {% for error in form.email.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            
+            <div class="mb-6">
+                <label for="password" class="block text-lg font-medium text-teal-700">{% trans "Password" %}</label>
+                <input id="password" type="password" name="password" class="mt-2 block w-full px-6 py-3 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent placeholder:text-gray-400 transition-all" placeholder="{% trans 'Enter your password' %}" required>
+                {% if form.password.errors %}
+                    <ul class="text-red-500 mt-2">
+                        {% for error in form.password.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            
+            <div class="mb-6">
+                <label for="confirm_password" class="block text-lg font-medium text-teal-700">{% trans "Confirm Password" %}</label>
+                <input id="confirm_password" type="password" name="confirm_password" class="mt-2 block w-full px-6 py-3 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent placeholder:text-gray-400 transition-all" placeholder="{% trans 'Confirm your password' %}" required>
+                {% if form.confirm_password.errors %}
+                    <ul class="text-red-500 mt-2">
+                        {% for error in form.confirm_password.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="w-full py-3 px-6 text-lg font-semibold text-white bg-teal-600 rounded-xl hover:bg-teal-700 focus:outline-none focus:ring-4 focus:ring-teal-500 transition-all duration-300 ease-in-out">
+                {% trans "Register" %}
+            </button>
+        </form>
+        
+        <div class="mt-6 text-center">
+            <span class="text-sm text-gray-600">{% trans "Already have an account?" %} </span>
+            <a href="{% url 'login' %}" class="text-sm font-semibold text-teal-600 hover:text-teal-800">{% trans "Login" %}</a>
+        </div>
+    </div>
+    
+    <!-- Decorative Background -->
+    <div class="absolute top-0 left-0 w-full h-full bg-black opacity-25 z-0"></div>
+</div>
+{% endblock %}

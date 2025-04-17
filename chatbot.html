@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+{% block title %}
+    {% trans "Chatbot-AgroAI" %}
+{% endblock %}
+
+{% block content %}
+<!-- Navigation Bar -->
+<nav class="bg-white shadow-md py-4 sticky top-0 z-50">
+    <div class="container mx-auto flex justify-between items-center px-4">
+        <a href="#" class="text-teal-700 text-3xl font-bold hover:text-teal-500 transition-colors">
+            {% trans "Chatbot" %}
+        </a>
+        <div class="space-x-4">
+            <a href="{% url 'home' %}" class="px-6 py-2 border border-teal-700 text-teal-700 rounded-md hover:bg-teal-700 hover:text-white transition-colors">
+                {% trans "Home" %}
+            </a>
+            <a href="{% url 'logout' %}" class="px-6 py-2 border border-teal-700 text-teal-700 rounded-md hover:bg-teal-700 hover:text-white transition-colors">
+                {% trans "Logout" %}
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Container -->
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center px-4">
+    <div class="w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <!-- Chat Messages -->
+        <div class="h-[70vh] overflow-y-auto p-8 bg-gray-50" id="messages-box" aria-live="polite" role="log">
+            <ul class="space-y-6" id="message-list">
+              {% for chat in chats %}
+                {% if chat.user == request.user %}
+                  <li class="user-message flex flex-col items-end opacity-0 animate-fade-in">
+                    <div class="flex items-center space-x-4">
+                      <div class="w-10 h-10 rounded-full bg-teal-700 flex items-center justify-center text-white">
+                          <i class="fas fa-user" aria-hidden="true"></i>
+                      </div>
+                      <div class="bg-teal-100 text-teal-800 rounded-3xl px-5 py-3 max-w-[80%] shadow">
+                          {% autoescape off %}{{ chat.message|safe }}{% endautoescape %}
+                      </div>
+                    </div>
+                    <span class="text-sm text-gray-500 mt-1" aria-label="{% trans 'Timestamp' %}">
+                      {{ chat.created_at|date:"SHORT_DATETIME_FORMAT" }}
+                    </span>
+                  </li>
+                    
+                  <li class="bot-message flex flex-col items-start opacity-0 animate-fade-in">
+                    <div class="flex items-center space-x-4">
+                      <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white">
+                          <i class="fas fa-robot" aria-hidden="true"></i>
+                      </div>
+                      <div class="bg-gray-200 text-gray-800 rounded-3xl px-5 py-3 max-w-[80%] shadow">
+                          {% autoescape off %}{{ chat.response|safe }}{% endautoescape %}
+                      </div>
+                    </div>
+                    <span class="text-sm text-gray-500 mt-1" aria-label="{% trans 'Timestamp' %}">
+                      {{ chat.created_at|date:"SHORT_DATETIME_FORMAT" }}
+                    </span>
+                  </li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+        </div>
+        
+        <!-- Input Form -->
+        <form class="flex items-center px-6 py-4 bg-white border-t border-gray-200" id="message-form">
+            {% csrf_token %}
+            <div class="relative flex-grow">
+                <input type="text" id="message-input" class="w-full px-5 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-shadow" placeholder="{% trans 'Type your message...' %}" required aria-label="{% trans 'Message input' %}" />
+                <button type="submit" class="absolute top-1/2 right-5 transform -translate-y-1/2 text-teal-500 hover:text-teal-600 transition-colors" aria-label="{% trans 'Send message' %}">
+                    <i class="fas fa-paper-plane text-2xl"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const messagesBox = document.getElementById('messages-box');
+    const messageForm = document.getElementById('message-form');
+    const messageInput = document.getElementById('message-input');
+    const messageList = document.getElementById('message-list');
+
+    // Function to scroll to bottom of messages
+    const scrollToBottom = () => {
+        messagesBox.scrollTop = messagesBox.scrollHeight;
+    };
+
+    // Auto-scroll on page load
+    scrollToBottom();
+
+    // Function to format current time as HH:MM (adjust as needed)
+    const getCurrentTimestamp = () => {
+        const now = new Date();
+        return now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    };
+
+    // Enhanced Error Handling: Function to display error messages
+    const displayErrorMessage = (errorText) => {
+        const errorMessage = document.createElement('li');
+        errorMessage.classList.add('error-message', 'flex', 'justify-center', 'items-center', 'mb-6', 'text-red-500');
+        errorMessage.textContent = errorText;
+        messageList.appendChild(errorMessage);
+        scrollToBottom();
+    };
+
+    // Function to add a user message to the message list
+    const addUserMessage = (message) => {
+        const userMessage = document.createElement('li');
+        userMessage.classList.add('user-message', 'flex', 'flex-col', 'items-end', 'opacity-0', 'animate-fade-in');
+        userMessage.innerHTML = `
+            <div class="flex items-center space-x-4">
+                <div class="w-10 h-10 rounded-full bg-teal-700 flex justify-center items-center text-white">
+                    <i class="fas fa-user" aria-hidden="true"></i>
+                </div>
+                <div class="bg-teal-100 text-teal-800 rounded-3xl px-5 py-3 max-w-[80%] shadow">
+                    ${message}
+                </div>
+            </div>
+            <span class="text-sm text-gray-500 mt-1" aria-label="Timestamp">${getCurrentTimestamp()}</span>
+        `;
+        messageList.appendChild(userMessage);
+        scrollToBottom();
+    };
+
+    // Function to add a bot message to the message list
+    const addBotMessage = (message) => {
+        const botMessage = document.createElement('li');
+        botMessage.classList.add('bot-message', 'flex', 'flex-col', 'items-start', 'opacity-0', 'animate-fade-in');
+        botMessage.innerHTML = `
+            <div class="flex items-center space-x-4">
+                <div class="w-10 h-10 rounded-full bg-gray-700 flex justify-center items-center text-white">
+                    <i class="fas fa-robot" aria-hidden="true"></i>
+                </div>
+                <div class="bg-gray-200 text-gray-800 rounded-3xl px-5 py-3 max-w-[80%] shadow">
+                    ${message}
+                </div>
+            </div>
+            <span class="text-sm text-gray-500 mt-1" aria-label="Timestamp">${getCurrentTimestamp()}</span>
+        `;
+        messageList.appendChild(botMessage);
+        scrollToBottom();
+    };
+
+    // Function to show animated typing indicator
+    const showTypingIndicator = () => {
+        const typingMessage = document.createElement('li');
+        typingMessage.id = 'typing-indicator';
+        typingMessage.classList.add('bot-message', 'flex', 'justify-start', 'items-center', 'mb-6');
+        typingMessage.innerHTML = `
+            <div class="w-10 h-10 rounded-full bg-gray-700 flex justify-center items-center text-white">
+                <i class="fas fa-robot" aria-hidden="true"></i>
+            </div>
+            <div class="bg-gray-200 text-gray-800 rounded-3xl px-5 py-3 max-w-[80%] shadow">
+                <span class="typing-dots">
+                    <span>.</span><span>.</span><span>.</span>
+                </span>
+            </div>
+        `;
+        messageList.appendChild(typingMessage);
+        scrollToBottom();
+    };
+
+    // Function to remove typing indicator
+    const removeTypingIndicator = () => {
+        const typingMessage = document.getElementById('typing-indicator');
+        if (typingMessage) {
+            messageList.removeChild(typingMessage);
+        }
+    };
+
+    // --- Real-Time Chat Updates via WebSockets ---
+    // (Requires Django Channels configuration on the backend)
+    const chatSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/chat/'
+    );
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        if (data.message_type === 'bot') {
+            addBotMessage(data.message);
+        }
+    };
+
+    chatSocket.onerror = function(e) {
+        console.error('Chat socket encountered an error:', e);
+    };
+
+    // --- Form Submission with Enhanced Error Handling ---
+    messageForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const message = messageInput.value.trim();
+        if (!message) return;
+        addUserMessage(message);
+        messageInput.value = '';
+
+        // Show typing indicator for bot response
+        showTypingIndicator();
+
+        // Send message via AJAX
+        fetch('', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                'csrfmiddlewaretoken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'message': message
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            removeTypingIndicator();
+            addBotMessage(data.response);
+        })
+        .catch(error => {
+            removeTypingIndicator();
+            console.error('Error:', error);
+            displayErrorMessage('{% trans "An error occurred while sending your message. Please try again." %}');
+        });
+    });
+</script>
+
+<style>
+    /* Fade-in Animation */
+    @keyframes fade-in {
+        0% {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .animate-fade-in {
+        animation: fade-in 0.5s ease-out forwards;
+    }
+    
+    /* Typing indicator dots animation */
+    .typing-dots span {
+        display: inline-block;
+        opacity: 0;
+        animation: blink 1s infinite;
+    }
+    .typing-dots span:nth-child(1) {
+        animation-delay: 0s;
+    }
+    .typing-dots span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+    .typing-dots span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+    @keyframes blink {
+        0%, 80%, 100% {
+            opacity: 0;
+        }
+        40% {
+            opacity: 1;
+        }
+    }
+</style>
+{% endblock %}

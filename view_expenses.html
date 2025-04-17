@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "View Expense" %}{% endblock %}
+{% block content %}
+<nav class="font-[Poppins] bg-transparent py-4 sticky top-0 z-50 ">
+    <div class="container mx-auto flex justify-between items-center px-4">
+        <!-- Expense History Title -->
+        <a href="#" class="text-teal-700 text-2xl font-semibold hover:text-teal-300 transition duration-300">
+            {% trans "Expense History" %}
+        </a>
+        <div>
+        <!-- Home Button -->
+            <a href="{% url 'home' %}" class="text-teal-700 border border-teal-700 px-6 py-2 rounded-md hover:bg-red-500 hover:text-white transition duration-300">
+            {% trans "Home" %}
+            </a>
+            <!-- Track Expenses Button -->
+            <a href="{% url 'expense' %}" class="text-teal-700 border border-teal-700 px-6 py-2 rounded-md hover:bg-red-500 hover:text-white  transition duration-300 ml-4">
+            {% trans "Track Expenses" %}
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- Page Content -->
+<div class="font-[Poppins] flex items-center justify-center min-h-screen bg-transparent px-6 py-10">
+    <div class="container mx-auto bg-white rounded-lg shadow-xl w-full max-w-4xl p-8">
+        <!-- Header -->
+        <h1 class="text-3xl font-bold text-center text-teal-700 mb-6">{% trans "Expense History" %}</h1>
+        <h3 class="text-xl text-center text-gray-700 mb-8">{% trans "Total Expenses:" %} {{ total_expenses }}</h3>
+
+        <!-- Expense Table -->
+        <div class="overflow-x-auto">
+            <table class="table-auto w-full border-collapse border border-gray-200">
+                <thead class="bg-teal-100">
+                    <tr>
+                        <th class="px-4 py-3 border border-gray-300 text-teal-700 text-sm">{% trans "Date" %}</th>
+                        <th class="px-4 py-3 border border-gray-300 text-teal-700 text-sm">{% trans "Category" %}</th>
+                        <th class="px-4 py-3 border border-gray-300 text-teal-700 text-sm">{% trans "Amount" %}</th>
+                        <th class="px-4 py-3 border border-gray-300 text-teal-700 text-sm">{% trans "Description" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in expenses %}
+                    <tr class="{% cycle 'bg-white' 'bg-teal-50' %} hover:bg-teal-200 transition duration-300">
+                        <td class="px-4 py-3 border border-gray-300 text-teal-700 text-sm">{{ expense.date }}</td>
+                        <td class="px-4 py-3 border border-gray-300 text-teal-700 text-sm">{{ expense.category }}</td>
+                        <td class="px-4 py-3 border border-gray-300 text-teal-700 text-sm">{{ expense.amount }}</td>
+                        <td class="px-4 py-3 border border-gray-300 text-teal-700 text-sm">{{ expense.description|default:"{% trans 'N/A' %}" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="px-4 py-3 border text-center text-gray-500 text-sm">{% trans "No expenses recorded yet." %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
